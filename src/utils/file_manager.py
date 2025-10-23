@@ -48,3 +48,26 @@ def generate_filename(format_type: str, custom_name: Optional[str] = None) -> st
     
     return filename
 
+
+def get_full_path(format_type: str, custom_name: Optional[str] = None) -> Path:
+    """
+    Generate full file path for export file.
+    
+    Args:
+        format_type: Export format (word, pdf, excel, csv, json)
+        custom_name: Optional custom filename (without extension)
+    
+    Returns:
+        Path: Full path to the export file
+        
+    Example:
+        get_full_path("word") -> Path("/path/to/exports/export_2024-10-23_14-30-22.docx")
+    """
+    export_dir = get_export_directory()
+    filename = generate_filename(format_type, custom_name)
+    full_path = export_dir / filename
+    
+    logger.debug(f"Generated file path: {full_path}")
+    
+    return full_path
+
