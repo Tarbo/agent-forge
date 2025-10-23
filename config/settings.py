@@ -4,7 +4,6 @@ Loads environment variables and provides configuration values to the app
 """
 import os
 from pathlib import Path
-from typing import Optional
 from dotenv import load_dotenv, find_dotenv
 
 # Load environment variables from .env file
@@ -56,3 +55,45 @@ def get_hotkey() -> str:
         return "<cmd>+<option>+e"  # ⌘⇧E
     else:  # Windows/Linux
         return "<ctrl>+<alt>+e"
+
+# ============================================================================
+# LLM CONFIGURATION
+# ============================================================================
+
+def get_llm_config() -> dict:
+    """
+    Auto-detect and return LLM configuration based on available API keys.
+    
+    Priority order:
+    1. OpenAI (if OPENAI_API_KEY exists)
+    2. Anthropic (if ANTHROPIC_API_KEY exists)
+    
+    Returns:
+        dict: {
+            "provider": "openai" | "anthropic",
+            "model": str
+        }
+    
+    Raises:
+        ValueError: If no LLM provider is configured
+    """
+    # Check for OpenAI
+    if os.getenv("OPENAI_API_KEY"):
+        return {
+            "provider": "openai",
+            "model": os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+        }
+    
+    # Check for Anthropic
+    if os.getenv("ANTHROPIC_API_KEY"):
+        return {
+            "provider": "anthropic",
+            "model": os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+        }
+    
+    # No provider configured
+    raise ValueError(
+        "No LLM provider configured! Please set one of:\n"
+        "  - OPENAI_API_KEY\n"
+        "  - ANTHROPIC_API_KEY"
+    )
