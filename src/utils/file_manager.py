@@ -4,6 +4,8 @@ File management utilities for saving and organizing export files.
 Handles filename generation, path management, and file operations.
 """
 import os
+import platform
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -70,4 +72,32 @@ def get_full_path(format_type: str, custom_name: Optional[str] = None) -> Path:
     logger.debug(f"Generated file path: {full_path}")
     
     return full_path
+
+
+def open_file(file_path: Path) -> bool:
+    """
+    Open file with the default system application.
+    
+    Args:
+        file_path: Path to the file to open
+    
+    Returns:
+        bool: True if file was opened successfully, False otherwise
+    """
+    try:
+        system = platform.system()
+        
+        if system == "Darwin":  # macOS
+            subprocess.run(["open", str(file_path)], check=True)
+        elif system == "Windows":
+            os.startfile(str(file_path))
+        else:  # Linux and others
+            subprocess.run(["xdg-open", str(file_path)], check=True)
+        
+        logger.info(f"Opened file: {file_path}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to open file {file_path}: {e}")
+        return False
 
