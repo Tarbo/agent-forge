@@ -63,7 +63,7 @@ def extract_formatting_node(state: ExportState) -> ExportState:
         
         # Convert Pydantic model to dict, removing None values
         formatting_dict = {
-            k: v for k, v in formatting_prefs.dict().items() 
+            k: v for k, v in formatting_prefs.items() 
             if v is not None
         }
         
@@ -213,7 +213,7 @@ def notification_node(state: ExportState) -> ExportState:
         return state
         
     except Exception as e:
-        logger.warning(f"Notification failed: {e}")
+        logger.warning(f"File opening failed: {e}")
         return state
 
 
