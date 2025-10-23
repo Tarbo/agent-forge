@@ -17,3 +17,25 @@ EXPORTS_DIR = PROJECT_ROOT / "exports"
 # Ensure exports directory exists
 EXPORTS_DIR.mkdir(exist_ok=True)
 
+
+# ============================================================================
+# APPLICATION SETTINGS
+# ============================================================================
+
+def get_export_directory() -> Path:
+    """
+    Get the export directory path from environment or use default.
+    
+    Returns:
+        Path: Directory where exported files will be saved
+    """
+    custom_dir = os.getenv("EXPORT_DIRECTORY")
+    
+    if custom_dir:
+        # Expand ~ and environment variables
+        expanded_path = Path(os.path.expandvars(os.path.expanduser(custom_dir)))
+        expanded_path.mkdir(parents=True, exist_ok=True)
+        return expanded_path
+    
+    return EXPORTS_DIR
+
