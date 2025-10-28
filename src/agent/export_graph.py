@@ -83,7 +83,7 @@ def create_export_graph() -> StateGraph:
     return compiled_graph
 
 
-# Create the graph instance (singleton pattern)
+# Create the graph instance
 export_graph = create_export_graph()
 
 
