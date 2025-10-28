@@ -49,7 +49,7 @@ class FormattingPreferences(BaseModel):
     # Title properties
     title_alignment: Optional[str] = Field(
         None, 
-        description="Title alignment: left, center, right"
+        description="Title alignment: left, center, right, or justify"
     )
     title_fontSize: Optional[int] = Field(
         None, 

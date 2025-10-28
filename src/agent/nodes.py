@@ -79,7 +79,7 @@ def extract_formatting_node(state: ExportState) -> ExportState:
         
         # Convert Pydantic model to dict, removing None values
         formatting_dict = {
-            k: v for k, v in formatting_prefs.items() 
+            k: v for k, v in formatting_prefs.model_dump().items() 
             if v is not None
         }
         
@@ -153,12 +153,12 @@ def word_node(state: ExportState) -> ExportState:
         # Get formatting from state
         formatting = state.get("formatting", {})
         
-        # Call Word export tool
-        file_path = export_to_word(
-            text=state["text"],
-            custom_name=None,
-            **formatting
-        )
+        # Call Word export tool using invoke (required for LangChain tools)
+        tool_input = {
+            "text": state["text"],
+            "formatting": formatting
+        }
+        file_path = export_to_word.invoke(tool_input)
         
         logger.info(f"Word export complete: {file_path}")
         
@@ -188,12 +188,12 @@ def pdf_node(state: ExportState) -> ExportState:
         # Get formatting from state
         formatting = state.get("formatting", {})
         
-        # Call PDF export tool
-        file_path = export_to_pdf(
-            text=state["text"],
-            custom_name=None,
-            **formatting
-        )
+        # Call PDF export tool using invoke (required for LangChain tools)
+        tool_input = {
+            "text": state["text"],
+            "formatting": formatting
+        }
+        file_path = export_to_pdf.invoke(tool_input)
         
         logger.info(f"PDF export complete: {file_path}")
         

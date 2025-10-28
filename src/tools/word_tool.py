@@ -31,6 +31,14 @@ TITLE_PROPERTIES = {
     "alignment": int,     # Title alignment
 }
 
+# Alignment mapping: string -> WD_ALIGN_PARAGRAPH constant
+ALIGNMENT_MAP = {
+    "left": WD_ALIGN_PARAGRAPH.LEFT,
+    "center": WD_ALIGN_PARAGRAPH.CENTER,
+    "right": WD_ALIGN_PARAGRAPH.RIGHT,
+    "justify": WD_ALIGN_PARAGRAPH.JUSTIFY,
+}
+
 # Default formatting values
 DEFAULT_FORMATTING = {
     "name": "Calibri",
@@ -90,8 +98,12 @@ def export_to_word(text: str, custom_name: str = None, formatting: dict = None) 
             for prop_name, prop_type in TITLE_PROPERTIES.items():
                 if prop_name in title_opts:
                     try:
-                        setattr(title, prop_name, title_opts[prop_name])
-                        logger.debug(f"Applied title.{prop_name} = {title_opts[prop_name]}")
+                        value = title_opts[prop_name]
+                        # Convert string alignment to enum constant
+                        if prop_name == "alignment" and isinstance(value, str):
+                            value = ALIGNMENT_MAP.get(value.lower(), WD_ALIGN_PARAGRAPH.LEFT)
+                        setattr(title, prop_name, value)
+                        logger.debug(f"Applied title.{prop_name} = {value}")
                     except Exception as e:
                         logger.warning(f"Failed to apply title.{prop_name}: {e}")
             
@@ -129,6 +141,9 @@ def export_to_word(text: str, custom_name: str = None, formatting: dict = None) 
                         if prop_name in format_opts:
                             try:
                                 value = format_opts[prop_name]
+                                # Convert string alignment to enum constant
+                                if prop_name == "alignment" and isinstance(value, str):
+                                    value = ALIGNMENT_MAP.get(value.lower(), WD_ALIGN_PARAGRAPH.LEFT)
                                 setattr(para, prop_name, value)
                                 logger.debug(f"Applied paragraph.{prop_name} = {value}")
                             except Exception as e:
