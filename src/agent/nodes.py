@@ -32,10 +32,11 @@ def extract_formatting_node(state: ExportState) -> ExportState:
     """
     Extract formatting preferences from user prompt using structured output.
     
-    Uses LLM with structured output to parse formatting details from natural language.
+    Leverages the detected format (from analyzer_node) to guide extraction
+    toward format-specific properties (Word vs PDF).
     
     Args:
-        state: Current state with user prompt
+        state: Current state with user prompt and detected format
         
     Returns:
         Updated state with formatting preferences
@@ -44,16 +45,31 @@ def extract_formatting_node(state: ExportState) -> ExportState:
         llm = get_llm()
         structured_llm = llm.with_structured_output(FormattingPreferences)
         
+        detected_format = state.get("format", "word")
+        
+        # Tailor extraction based on detected format
+        if detected_format == "word":
+            format_specific_guidance = """
+            This is for a Word document (.docx). Focus on:
+            - name: Font name (Arial, Calibri, Times New Roman, etc.)
+            - size: Font size in points
+            - bold, italic, underline: Text styling
+            - title_alignment: Title alignment (left, center, right)
+            """
+        else:  # pdf
+            format_specific_guidance = """
+            This is for a PDF document. Focus on:
+            - fontName: PDF font name (Helvetica, Times-Roman, Courier, etc.)
+            - fontSize: Font size in points
+            - leftMargin, rightMargin, topMargin, bottomMargin: Page margins in points (72 = 1 inch)
+            - title_alignment: Title alignment (left, center, right)
+            """
+        
         prompt = f"""
-        Extract ALL formatting preferences mentioned in this user request:
+        Extract formatting preferences for a {detected_format.upper()} export from:
         "{state['prompt']}"
         
-        Look for:
-        - Font names (Arial, Calibri, Times New Roman, Helvetica, etc.)
-        - Font sizes (10pt, 12pt, 14pt, etc.)
-        - Text styling (bold, italic, underline)
-        - Title alignment (centered, left-aligned, right-aligned)
-        - Margins (wide margins, narrow margins, specific measurements)
+        {format_specific_guidance}
         
         Only include properties that are explicitly mentioned.
         Return null for properties not specified.
@@ -67,7 +83,7 @@ def extract_formatting_node(state: ExportState) -> ExportState:
             if v is not None
         }
         
-        logger.info(f"Extracted formatting: {formatting_dict}")
+        logger.info(f"Extracted {detected_format} formatting: {formatting_dict}")
         
         return {**state, "formatting": formatting_dict}
         
