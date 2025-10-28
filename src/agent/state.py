@@ -13,11 +13,13 @@ class ExportState(TypedDict):
     Attributes:
         text: The text content to be exported (from clipboard)
         prompt: User's natural language prompt describing desired export format
-        format: Detected export format (word, pdf, excel, csv, json)
+        format: Detected export format (word, pdf)
+        formatting: Dict of formatting preferences extracted from prompt
         file_path: Full path to the generated export file
     """
     text: str
     prompt: str
     format: str
+    formatting: dict
     file_path: str
 

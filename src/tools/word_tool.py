@@ -31,6 +31,14 @@ TITLE_PROPERTIES = {
     "alignment": int,     # Title alignment
 }
 
+# Alignment mapping: string -> WD_ALIGN_PARAGRAPH constant
+ALIGNMENT_MAP = {
+    "left": WD_ALIGN_PARAGRAPH.LEFT,
+    "center": WD_ALIGN_PARAGRAPH.CENTER,
+    "right": WD_ALIGN_PARAGRAPH.RIGHT,
+    "justify": WD_ALIGN_PARAGRAPH.JUSTIFY,
+}
+
 # Default formatting values
 DEFAULT_FORMATTING = {
     "name": "Calibri",
@@ -43,17 +51,17 @@ DEFAULT_TITLE_FORMATTING = {
 
 
 @tool
-def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
+def export_to_word(text: str, custom_name: str = None, formatting: dict = None) -> str:
     """
     Export text content as a Microsoft Word document (.docx) with dynamic formatting.
     
     This tool creates a formatted Word document with the provided text.
-    Accepts any formatting options via kwargs - unsupported options are gracefully ignored.
+    Accepts any formatting options via dict - unsupported options are gracefully ignored.
     
     Args:
         text: The text content to export to Word
         custom_name: Optional custom filename (without extension)
-        **formatting: Dynamic formatting options (see FONT_PROPERTIES and PARAGRAPH_PROPERTIES)
+        formatting: Dict of formatting options (see FONT_PROPERTIES and PARAGRAPH_PROPERTIES)
     
     Supported formatting (extensible via registries):
         Font: name, size, bold, italic, underline
@@ -65,8 +73,8 @@ def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
         
     Example:
         export_to_word("My Title\n\nContent here", "my_report", 
-                       name="Arial", size=14, bold=True,
-                       title_alignment=WD_ALIGN_PARAGRAPH.CENTER)
+                       formatting={"name": "Arial", "size": 14, "bold": True,
+                                   "title_alignment": WD_ALIGN_PARAGRAPH.CENTER})
         # Returns: "/path/to/exports/my_report_2024-10-23_14-30-22.docx"
     """
     try:
@@ -74,7 +82,7 @@ def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
         file_path = get_full_path("word", custom_name)
         
         # Merge user formatting with defaults
-        format_opts = {**DEFAULT_FORMATTING, **formatting}
+        format_opts = {**DEFAULT_FORMATTING, **(formatting or {})}
         
         # Create Document
         doc = Document()
@@ -90,8 +98,12 @@ def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
             for prop_name, prop_type in TITLE_PROPERTIES.items():
                 if prop_name in title_opts:
                     try:
-                        setattr(title, prop_name, title_opts[prop_name])
-                        logger.debug(f"Applied title.{prop_name} = {title_opts[prop_name]}")
+                        value = title_opts[prop_name]
+                        # Convert string alignment to enum constant
+                        if prop_name == "alignment" and isinstance(value, str):
+                            value = ALIGNMENT_MAP.get(value.lower(), WD_ALIGN_PARAGRAPH.LEFT)
+                        setattr(title, prop_name, value)
+                        logger.debug(f"Applied title.{prop_name} = {value}")
                     except Exception as e:
                         logger.warning(f"Failed to apply title.{prop_name}: {e}")
             
@@ -105,27 +117,33 @@ def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
             paragraphs = remaining_text.split('\n\n')
             for para_text in paragraphs:
                 if para_text.strip():
-                    para = doc.add_paragraph(para_text.strip())
+                    # Create empty paragraph first
+                    para = doc.add_paragraph()
+                    
+                    # Add run with text (this allows us to format it)
+                    run = para.add_run(para_text.strip())
                     
                     # Apply font properties dynamically from registry
-                    for run in para.runs:
-                        for prop_name, prop_type in FONT_PROPERTIES.items():
-                            if prop_name in format_opts:
-                                try:
-                                    value = format_opts[prop_name]
-                                    # Convert size to Pt if needed
-                                    if prop_name == "size" and prop_type == Pt:
-                                        value = Pt(value)
-                                    setattr(run.font, prop_name, value)
-                                    logger.debug(f"Applied font.{prop_name} = {value}")
-                                except Exception as e:
-                                    logger.warning(f"Failed to apply font.{prop_name}: {e}")
+                    for prop_name, prop_type in FONT_PROPERTIES.items():
+                        if prop_name in format_opts:
+                            try:
+                                value = format_opts[prop_name]
+                                # Convert size to Pt if needed
+                                if prop_name == "size" and prop_type == Pt:
+                                    value = Pt(value)
+                                setattr(run.font, prop_name, value)
+                                logger.debug(f"Applied font.{prop_name} = {value}")
+                            except Exception as e:
+                                logger.warning(f"Failed to apply font.{prop_name}: {e}")
                     
                     # Apply paragraph properties dynamically from registry
                     for prop_name, prop_type in PARAGRAPH_PROPERTIES.items():
                         if prop_name in format_opts:
                             try:
                                 value = format_opts[prop_name]
+                                # Convert string alignment to enum constant
+                                if prop_name == "alignment" and isinstance(value, str):
+                                    value = ALIGNMENT_MAP.get(value.lower(), WD_ALIGN_PARAGRAPH.LEFT)
                                 setattr(para, prop_name, value)
                                 logger.debug(f"Applied paragraph.{prop_name} = {value}")
                             except Exception as e:
