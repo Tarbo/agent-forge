@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
 from src.agent.state import ExportState
-from src.agent.models import FormattingPreferences
+from src.agent.data_models import FormattingPreferences
 from config.settings import get_llm_config
 from src.utils.logger import logger
 from src.tools.word_tool import export_to_word
