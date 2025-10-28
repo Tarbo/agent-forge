@@ -60,17 +60,17 @@ DEFAULT_PAGE_FORMATTING = {
 
 
 @tool
-def export_to_pdf(text: str, custom_name: str = None, **formatting) -> str:
+def export_to_pdf(text: str, custom_name: str = None, formatting: dict = None) -> str:
     """
     Export text content as a PDF document.
     
     This tool creates a formatted PDF document with the provided text.
-    Accepts any formatting options via kwargs - unsupported options are gracefully ignored.
+    Accepts any formatting options via dict - unsupported options are gracefully ignored.
     
     Args:
         text: The text content to export to PDF
         custom_name: Optional custom filename (without extension)
-        **formatting: Dynamic formatting options (see property registries)
+        formatting: Dict of formatting options (see property registries)
     
     Supported formatting (extensible via registries):
         Font: fontName, fontSize, textColor
@@ -83,9 +83,9 @@ def export_to_pdf(text: str, custom_name: str = None, **formatting) -> str:
         
     Example:
         export_to_pdf("My Title\\n\\nContent here", "my_report", 
-                      fontName="Times-Roman", fontSize=11,
-                      title_alignment=TA_CENTER,
-                      leftMargin=100, rightMargin=100)
+                      formatting={"fontName": "Times-Roman", "fontSize": 11,
+                                  "title_alignment": TA_CENTER,
+                                  "leftMargin": 100, "rightMargin": 100})
         # Returns: "/path/to/exports/my_report_2024-10-23_14-30-22.pdf"
     """
     try:
@@ -93,8 +93,8 @@ def export_to_pdf(text: str, custom_name: str = None, **formatting) -> str:
         file_path = get_full_path("pdf", custom_name)
         
         # Merge user formatting with defaults
-        format_opts = {**DEFAULT_FORMATTING, **formatting}
-        page_opts = {**DEFAULT_PAGE_FORMATTING, **{k: v for k, v in formatting.items() if k in PAGE_PROPERTIES}}
+        format_opts = {**DEFAULT_FORMATTING, **(formatting or {})}
+        page_opts = {**DEFAULT_PAGE_FORMATTING, **{k: v for k, v in (formatting or {}).items() if k in PAGE_PROPERTIES}}
         
         # Create PDF document with dynamic margins
         doc = SimpleDocTemplate(
