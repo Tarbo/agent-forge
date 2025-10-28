@@ -43,17 +43,17 @@ DEFAULT_TITLE_FORMATTING = {
 
 
 @tool
-def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
+def export_to_word(text: str, custom_name: str = None, formatting: dict = None) -> str:
     """
     Export text content as a Microsoft Word document (.docx) with dynamic formatting.
     
     This tool creates a formatted Word document with the provided text.
-    Accepts any formatting options via kwargs - unsupported options are gracefully ignored.
+    Accepts any formatting options via dict - unsupported options are gracefully ignored.
     
     Args:
         text: The text content to export to Word
         custom_name: Optional custom filename (without extension)
-        **formatting: Dynamic formatting options (see FONT_PROPERTIES and PARAGRAPH_PROPERTIES)
+        formatting: Dict of formatting options (see FONT_PROPERTIES and PARAGRAPH_PROPERTIES)
     
     Supported formatting (extensible via registries):
         Font: name, size, bold, italic, underline
@@ -65,8 +65,8 @@ def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
         
     Example:
         export_to_word("My Title\n\nContent here", "my_report", 
-                       name="Arial", size=14, bold=True,
-                       title_alignment=WD_ALIGN_PARAGRAPH.CENTER)
+                       formatting={"name": "Arial", "size": 14, "bold": True,
+                                   "title_alignment": WD_ALIGN_PARAGRAPH.CENTER})
         # Returns: "/path/to/exports/my_report_2024-10-23_14-30-22.docx"
     """
     try:
@@ -74,7 +74,7 @@ def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
         file_path = get_full_path("word", custom_name)
         
         # Merge user formatting with defaults
-        format_opts = {**DEFAULT_FORMATTING, **formatting}
+        format_opts = {**DEFAULT_FORMATTING, **(formatting or {})}
         
         # Create Document
         doc = Document()
