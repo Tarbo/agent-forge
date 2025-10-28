@@ -5,7 +5,6 @@ Provides a configured logger for use throughout the app.
 """
 import logging
 import sys
-from pathlib import Path
 
 
 def setup_logger(name: str = "llm-export-tools", level: int = logging.INFO) -> logging.Logger:
