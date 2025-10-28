@@ -105,21 +105,24 @@ def export_to_word(text: str, custom_name: str = None, **formatting) -> str:
             paragraphs = remaining_text.split('\n\n')
             for para_text in paragraphs:
                 if para_text.strip():
-                    para = doc.add_paragraph(para_text.strip())
+                    # Create empty paragraph first
+                    para = doc.add_paragraph()
+                    
+                    # Add run with text (this allows us to format it)
+                    run = para.add_run(para_text.strip())
                     
                     # Apply font properties dynamically from registry
-                    for run in para.runs:
-                        for prop_name, prop_type in FONT_PROPERTIES.items():
-                            if prop_name in format_opts:
-                                try:
-                                    value = format_opts[prop_name]
-                                    # Convert size to Pt if needed
-                                    if prop_name == "size" and prop_type == Pt:
-                                        value = Pt(value)
-                                    setattr(run.font, prop_name, value)
-                                    logger.debug(f"Applied font.{prop_name} = {value}")
-                                except Exception as e:
-                                    logger.warning(f"Failed to apply font.{prop_name}: {e}")
+                    for prop_name, prop_type in FONT_PROPERTIES.items():
+                        if prop_name in format_opts:
+                            try:
+                                value = format_opts[prop_name]
+                                # Convert size to Pt if needed
+                                if prop_name == "size" and prop_type == Pt:
+                                    value = Pt(value)
+                                setattr(run.font, prop_name, value)
+                                logger.debug(f"Applied font.{prop_name} = {value}")
+                            except Exception as e:
+                                logger.warning(f"Failed to apply font.{prop_name}: {e}")
                     
                     # Apply paragraph properties dynamically from registry
                     for prop_name, prop_type in PARAGRAPH_PROPERTIES.items():
