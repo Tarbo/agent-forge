@@ -13,10 +13,8 @@ reportlab>=4.0.0
 openpyxl>=3.1.0
 xlsxwriter>=3.1.0
 
-# GUI and system integration
-pynput>=1.7.6
-pyperclip>=1.8.2
-tkinter-tooltip>=2.1.0
+# Web interface
+streamlit>=1.28.0
 
 # Utilities
 python-dotenv
