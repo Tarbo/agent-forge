@@ -56,6 +56,17 @@ def get_hotkey() -> str:
     else:  # Windows/Linux
         return "<ctrl>+<alt>+e"
 
+
+def get_auto_open_file() -> bool:
+    """
+    Get whether to automatically open exported files.
+    Defaults to False for better UX (user gets a download button in GUI).
+    
+    Returns:
+        bool: True to auto-open, False to only log the file path
+    """
+    return os.getenv("AUTO_OPEN_FILE", "false").lower() == "true"
+
 # ============================================================================
 # LLM CONFIGURATION
 # ============================================================================
