@@ -120,7 +120,23 @@ EXPORT_DIRECTORY=~/Downloads/llm-exports
 
 ## 🚀 Usage
 
-### Option 1: Run Tests (Recommended)
+### Option 1: Desktop App (Hotkey-Triggered) 🔥
+
+Run the desktop application with global hotkey support:
+
+```bash
+python main.py
+```
+
+**Workflow:**
+1. **Copy text** to clipboard (Cmd+C / Ctrl+C)
+2. **Press hotkey** (Cmd+Option+E on Mac, Ctrl+Alt+E on Windows/Linux)
+3. **Enter export instructions** in the dialog (e.g., "Export as Word with bold text")
+4. **Done!** File is created and shown with options to open or copy path
+
+The app runs in the background, listening for your hotkey trigger. Press Ctrl+C in the terminal to quit.
+
+### Option 2: Run Tests
 
 The best way to see the workflow in action is through the test suite:
 
@@ -135,7 +151,7 @@ pytest tests/test_workflow.py::TestWordExport::test_word_export_with_formatting 
 pytest tests/test_workflow.py --cov=src --cov-report=html --cov-report=term
 ```
 
-### Option 2: Programmatic API
+### Option 3: Programmatic API
 
 You can also use the workflow directly in Python:
 
@@ -419,17 +435,19 @@ MIT License - see [LICENSE](LICENSE) file for details
 ## 💡 Why This Tool?
 
 ### The Problem
-ChatGPT API has rate limits that interrupt your workflow:
+ChatGPT and other LLM platforms have limitations:
 - "You've reached your usage limit"
 - "Please wait X minutes before trying again"
-- Expensive API calls for simple exports
+- Expensive API subscriptions for basic features
+- Privacy concerns with sending data to cloud
 
 ### The Solution
-This tool runs **entirely on your machine**, bypassing all API rate limits:
-- ✅ Unlimited exports
-- ✅ Complete privacy (data stays local)
-- ✅ Faster processing (no network latency)
-- ✅ Lower cost (only pay for LLM inference, not per-export)
+This tool gives you complete control:
+- ✅ **Unlimited exports** - No rate limits, no waiting
+- ✅ **Complete privacy** - All processing happens locally with Ollama
+- ✅ **Zero cost** - Run free open-source models (phi3, mistral, llama, etc.)
+- ✅ **Faster processing** - No network latency
+- ✅ **Or use cloud LLMs** - Optional OpenAI/Anthropic for better quality
 
 ---
 
