@@ -213,23 +213,75 @@ Edit `.env` to customize:
 
 ### LLM Provider
 
-**Option 1: OpenAI**
+**Option 1: Ollama (Local, Private, No API Costs)** ⭐ Recommended
+```env
+USE_OLLAMA=true
+OLLAMA_MODEL=phi3_q4:latest
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+Requirements:
+1. Install Ollama: https://ollama.ai
+2. Pull or import a model (see below)
+3. Start Ollama: `ollama serve`
+
+**Option 2: OpenAI (Cloud)**
 ```env
 OPENAI_API_KEY=sk-your-key-here
+OPENAI_MODEL=gpt-3.5-turbo
 ```
 
-**Option 2: Anthropic**
+**Option 3: Anthropic (Cloud)**
 ```env
 ANTHROPIC_API_KEY=sk-ant-your-key-here
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
 ```
-
-> **Coming Soon:** Ollama support for local, private LLM inference
 
 ### Application Settings
 
 ```env
 # Where to save exported files
 EXPORT_DIRECTORY=~/Downloads/llm-exports
+
+# Auto-open files after export (default: false)
+AUTO_OPEN_FILE=false
+```
+
+### Ollama: Importing Models from HuggingFace
+
+If you're behind a corporate firewall and can't use `ollama pull`, you can manually import models:
+
+**Step 1: Download GGUF model from HuggingFace**
+- Example: [bartowski/Llama-3.2-3B-Instruct-GGUF](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF)
+- Download the `Q4_K_M` or `Q5_K_M` variant (~2GB)
+
+**Step 2: Create a `Modelfile`**
+```dockerfile
+FROM ./Llama-3.2-3B-Instruct-Q4_K_M.gguf
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+
+TEMPLATE """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+{{ .System }}<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+{{ .Prompt }}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+{{ .Response }}<|eot_id|>"""
+
+SYSTEM """You are a helpful AI assistant."""
+```
+
+**Step 3: Import into Ollama**
+```bash
+cd ~/Downloads  # Where you saved the GGUF file
+ollama create llama3.2:3b-instruct -f Modelfile
+```
+
+**Step 4: Update your `.env`**
+```env
+OLLAMA_MODEL=llama3.2:3b-instruct
 ```
 
 ---
