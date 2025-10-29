@@ -38,23 +38,8 @@ def get_export_directory() -> Path:
     
     return EXPORTS_DIR
 
-
-def get_hotkey() -> str:
-    """Get hotkey based on OS
-    Returns:
-        str: Hotkey string in pynput format (e.g., '<ctrl>+<alt>+e')
-    """
-    default = os.getenv("HOTKEY")
-    
-    if default:
-        return default
-    
-    # Auto-detect based on OS
-    import platform
-    if platform.system() == "Darwin":  # macOS
-        return "<cmd>+<option>+e"  # ⌘⇧E
-    else:  # Windows/Linux
-        return "<ctrl>+<alt>+e"
+# Alias for backward compatibility
+get_export_dir = get_export_directory
 
 
 def get_auto_open_file() -> bool:
