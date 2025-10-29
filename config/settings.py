@@ -56,27 +56,48 @@ def get_hotkey() -> str:
     else:  # Windows/Linux
         return "<ctrl>+<alt>+e"
 
+
+def get_auto_open_file() -> bool:
+    """
+    Get whether to automatically open exported files.
+    Defaults to False for better UX (user gets a download button in GUI).
+    
+    Returns:
+        bool: True to auto-open, False to only log the file path
+    """
+    return os.getenv("AUTO_OPEN_FILE", "false").lower() == "true"
+
 # ============================================================================
 # LLM CONFIGURATION
 # ============================================================================
 
 def get_llm_config() -> dict:
     """
-    Auto-detect and return LLM configuration based on available API keys.
+    Auto-detect and return LLM configuration based on available settings.
     
     Priority order:
-    1. OpenAI (if OPENAI_API_KEY exists)
-    2. Anthropic (if ANTHROPIC_API_KEY exists)
+    1. Ollama (if USE_OLLAMA=true)
+    2. OpenAI (if OPENAI_API_KEY exists)
+    3. Anthropic (if ANTHROPIC_API_KEY exists)
     
     Returns:
         dict: {
-            "provider": "openai" | "anthropic",
-            "model": str
+            "provider": "ollama" | "openai" | "anthropic",
+            "model": str,
+            "base_url": str (optional, for Ollama)
         }
     
     Raises:
         ValueError: If no LLM provider is configured
     """
+    # Check for Ollama (local LLM)
+    if os.getenv("USE_OLLAMA", "false").lower() == "true":
+        return {
+            "provider": "ollama",
+            "model": os.getenv("OLLAMA_MODEL", "phi3_q4:latest"),
+            "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        }
+    
     # Check for OpenAI
     if os.getenv("OPENAI_API_KEY"):
         return {
@@ -94,6 +115,7 @@ def get_llm_config() -> dict:
     # No provider configured
     raise ValueError(
         "No LLM provider configured! Please set one of:\n"
+        "  - USE_OLLAMA=true (with OLLAMA_MODEL and OLLAMA_BASE_URL)\n"
         "  - OPENAI_API_KEY\n"
         "  - ANTHROPIC_API_KEY"
     )

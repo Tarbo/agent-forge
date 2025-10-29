@@ -6,6 +6,7 @@ Each node processes the state and returns an updated state.
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
+from langchain_ollama import ChatOllama
 
 from src.agent.state import ExportState
 from src.agent.data_models import FormattingPreferences
@@ -20,7 +21,12 @@ def get_llm():
     """Get configured LLM instance based on settings."""
     config = get_llm_config()
     
-    if config["provider"] == "openai":
+    if config["provider"] == "ollama":
+        return ChatOllama(
+            model=config["model"],
+            base_url=config["base_url"]
+        )
+    elif config["provider"] == "openai":
         return ChatOpenAI(model=config["model"])
     elif config["provider"] == "anthropic":
         return ChatAnthropic(model=config["model"])
@@ -216,15 +222,19 @@ def notification_node(state: ExportState) -> ExportState:
         Final state
     """
     try:
+        from config.settings import get_auto_open_file
         file_path = Path(state["file_path"])
         
         logger.info(f"✅ Export complete: {file_path}")
         logger.info(f"   Format: {state['format']}")
         logger.info(f"   Formatting applied: {state.get('formatting', {})}")
         
-        # Try to open the file
-        if open_file(file_path):
-            logger.info("File opened successfully")
+        # Only auto-open if enabled (disabled by default for better UX)
+        if get_auto_open_file():
+            if open_file(file_path):
+                logger.info("File opened successfully")
+        else:
+            logger.info("File ready. Set AUTO_OPEN_FILE=true in .env to auto-open.")
         
         return state
         

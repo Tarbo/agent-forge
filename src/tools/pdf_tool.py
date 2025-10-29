@@ -118,22 +118,50 @@ def export_to_pdf(text: str, custom_name: str = None, formatting: dict = None) -
             title_text = ""
             remaining_text = text
         
-        # Create and apply title style dynamically
+        # Create and apply title style dynamically with validation
         if title_text:
+            title_style_attrs = {}
+            
+            # Apply title properties from registry
+            for prop_name, prop_type in TITLE_PROPERTIES.items():
+                title_key = f"title_{prop_name}"
+                if title_key in format_opts:
+                    value = format_opts[title_key]
+                    # Validate and add
+                    if value is not None:
+                        if prop_type in (int, float) and isinstance(value, (int, float)) and value > 0:
+                            title_style_attrs[prop_name] = value
+                        elif prop_type == str and isinstance(value, str):
+                            title_style_attrs[prop_name] = value
+                        else:
+                            logger.debug(f"Skipping invalid title attr: {prop_name}={value}")
+            
             title_style = ParagraphStyle(
                 'CustomTitle',
                 parent=styles['Heading1'],
-                **{**DEFAULT_TITLE_FORMATTING, **{k.replace("title_", ""): v for k, v in format_opts.items() if k.startswith("title_")}}
+                **{**DEFAULT_TITLE_FORMATTING, **title_style_attrs}
             )
             
             title_para = Paragraph(title_text, title_style)
             elements.append(title_para)
             elements.append(Spacer(1, 12))
         
-        # Create custom paragraph style dynamically
-        para_style_attrs = {**format_opts}
-        # Remove title-specific props
-        para_style_attrs = {k: v for k, v in para_style_attrs.items() if not k.startswith("title_")}
+        # Create custom paragraph style dynamically with validated properties
+        para_style_attrs = {}
+        
+        # Apply paragraph properties from registry
+        for prop_name, prop_type in PARAGRAPH_PROPERTIES.items():
+            if prop_name in format_opts and not prop_name.startswith("title_"):
+                value = format_opts[prop_name]
+                # Validate and add
+                if value is not None:
+                    # Validate numeric properties
+                    if prop_type in (int, float) and isinstance(value, (int, float)) and value > 0:
+                        para_style_attrs[prop_name] = value
+                    elif prop_type == str and isinstance(value, str):
+                        para_style_attrs[prop_name] = value
+                    else:
+                        logger.debug(f"Skipping invalid para style attr: {prop_name}={value}")
         
         para_style = ParagraphStyle(
             'CustomBody',
