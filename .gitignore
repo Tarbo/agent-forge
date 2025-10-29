@@ -22,7 +22,7 @@ wheels/
 *.egg
 
 # Virtual Environment
-venv3.12/
+venv_3.12_tink/
 env/
 ENV/
 
