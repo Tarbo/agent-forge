@@ -7,6 +7,25 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
+class ExportIntentAnalysis(BaseModel):
+    """
+    Structured format for detecting export intent from user message.
+    
+    Used by analyzer_node to determine if user wants to export
+    and what format they want.
+    """
+    export_intent: bool = Field(
+        description="True if user wants to export/save/download content, False otherwise"
+    )
+    format: str = Field(
+        description="Export format: 'word' for Word/docx, 'pdf' for PDF. Default to 'word' if not specified."
+    )
+    reasoning: Optional[str] = Field(
+        None,
+        description="Brief explanation of why export intent was detected or not"
+    )
+
+
 class FormattingPreferences(BaseModel):
     """
     Structured format for LLM-extracted formatting preferences.
