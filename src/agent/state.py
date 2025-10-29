@@ -11,14 +11,16 @@ class ExportState(TypedDict):
     State schema for the export workflow.
     
     Attributes:
-        text: The text content to be exported (from clipboard)
+        text: The text content to be exported (from clipboard or chat)
         prompt: User's natural language prompt describing desired export format
+        export_intent: Whether user wants to export (True/False)
         format: Detected export format (word, pdf)
         formatting: Dict of formatting preferences extracted from prompt
         file_path: Full path to the generated export file
     """
     text: str
     prompt: str
+    export_intent: bool
     format: str
     formatting: dict
     file_path: str
