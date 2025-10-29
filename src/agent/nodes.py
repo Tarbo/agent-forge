@@ -6,6 +6,7 @@ Each node processes the state and returns an updated state.
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
+from langchain_ollama import ChatOllama
 
 from src.agent.state import ExportState
 from src.agent.data_models import FormattingPreferences
@@ -20,7 +21,12 @@ def get_llm():
     """Get configured LLM instance based on settings."""
     config = get_llm_config()
     
-    if config["provider"] == "openai":
+    if config["provider"] == "ollama":
+        return ChatOllama(
+            model=config["model"],
+            base_url=config["base_url"]
+        )
+    elif config["provider"] == "openai":
         return ChatOpenAI(model=config["model"])
     elif config["provider"] == "anthropic":
         return ChatAnthropic(model=config["model"])
