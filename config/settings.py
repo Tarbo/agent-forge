@@ -83,7 +83,7 @@ def get_llm_config() -> dict:
     if os.getenv("USE_OLLAMA", "false").lower() == "true":
         return {
             "provider": "ollama",
-            "model": os.getenv("OLLAMA_MODEL", "llama3.2"),
+            "model": os.getenv("OLLAMA_MODEL", "phi3_q4:latest"),
             "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         }
     
