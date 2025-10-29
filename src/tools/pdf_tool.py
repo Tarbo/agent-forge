@@ -3,7 +3,6 @@ PDF export tool.
 
 Uses reportlab to create formatted PDF files with dynamic formatting support.
 """
-from pathlib import Path
 from langchain_core.tools import tool
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
