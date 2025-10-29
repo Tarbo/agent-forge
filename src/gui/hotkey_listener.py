@@ -5,7 +5,6 @@ Listens for configured hotkey combination and triggers export workflow.
 """
 from typing import Callable, Optional
 from pynput import keyboard
-from pynput.keyboard import Key, KeyCode
 from config.settings import get_hotkey
 from src.utils.logger import logger
 
