@@ -1,8 +1,8 @@
 # 🚀 LLM Export Tools
 
-**An agentic AI workflow that bypasses API rate limits by converting text into various file formats using LangGraph v1.0.**
+**An agentic AI workflow powered by LangGraph v1.0 that intelligently converts text into formatted documents.**
 
-Stop waiting for API limits! This tool uses a LangGraph-powered StateGraph to intelligently export your text to Word or PDF formats with customizable formatting based on natural language prompts.
+Export your text to Word or PDF with AI-powered formatting extraction! This tool uses a LangGraph StateGraph to analyze natural language prompts, extract formatting preferences, and route to the appropriate export tool. Features a beautiful Streamlit interface with real-time agent visualization and adjustment controls.
 
 ---
 
@@ -13,14 +13,15 @@ Stop waiting for API limits! This tool uses a LangGraph-powered StateGraph to in
 - 📄 **Export Formats** (Current):
   - **Word** (`.docx`) - Formatted documents with python-docx
   - **PDF** (`.pdf`) - Professional PDFs with reportlab
-- 🔒 **Privacy-First** - All processing happens locally (supports OpenAI, Anthropic)
-- ⚡ **Bypass API Rate Limits** - Use your own API keys or Ollama (coming soon)
+- 🎨 **Beautiful Streamlit UI** - Interactive 3-stage workflow with real-time preview
+- 🔒 **Privacy-First** - All processing happens locally (supports OpenAI, Anthropic, Ollama)
+- ⚡ **Bypass API Rate Limits** - Use your own API keys or local Ollama models
 - 🧪 **Full Test Coverage** - Comprehensive pytest suite
 - 🔧 **Extensible** - Property registry pattern for easy feature additions
 
-**Coming Soon:**
-- 🎯 GUI with global hotkey activation
-- 📊 Excel, CSV, and JSON export formats
+**Future Enhancements:**
+- 📊 Excel (`.xlsx`), CSV, and JSON export formats
+- 📈 Markdown (`.md`) export with syntax highlighting
 
 ---
 
@@ -65,9 +66,10 @@ graph TB
 ## 📋 Prerequisites
 
 - **Python 3.8+**
-- **API Key** for LLM provider:
-  - OpenAI API key, OR
-  - Anthropic API key
+- **LLM Provider** (choose one):
+  - **Ollama** (local, free) - Recommended for privacy, OR
+  - **OpenAI API key** (cloud, paid), OR
+  - **Anthropic API key** (cloud, paid)
 
 ---
 
@@ -76,7 +78,7 @@ graph TB
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/llm-export-tools.git
+git clone https://github.com/Tarbo/llm-export-tools.git
 cd llm-export-tools
 ```
 
@@ -97,9 +99,9 @@ pip install -r requirements.txt
 
 ```bash
 # Copy the example env file
-cp config/.env.example .env
+cp env.example .env
 
-# Edit .env with your API keys
+# Edit .env with your configuration
 nano .env  # or use your favorite editor
 ```
 
@@ -107,20 +109,53 @@ nano .env  # or use your favorite editor
 
 ```env
 # LLM Provider (choose one)
-OPENAI_API_KEY=sk-your-openai-key-here
+
+# Option 1: Ollama (Local, Private, No API costs)
+USE_OLLAMA=true
+OLLAMA_MODEL=phi3_q4:latest
+OLLAMA_BASE_URL=http://localhost:11434
+
+# Option 2: OpenAI
+# OPENAI_API_KEY=sk-your-openai-key-here
+# OPENAI_MODEL=gpt-3.5-turbo
+
+# Option 3: Anthropic
 # ANTHROPIC_API_KEY=sk-ant-your-anthropic-key-here
+# ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
 
 # Application Settings
 EXPORT_DIRECTORY=~/Downloads/llm-exports
 ```
 
-> **Note:** Ollama support coming in a future PR!
+> **Note:** For Ollama setup instructions, see `env.example` or the Ollama section below.
 
 ---
 
 ## 🚀 Usage
 
-### Option 1: Run Tests (Recommended)
+### Option 1: Streamlit Web App 🎨
+
+Run the beautiful Streamlit web interface:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+This opens a modern web interface at `http://localhost:8501` with:
+
+**Interactive 3-Stage Workflow:**
+1. **📝 Input Stage** - Enter your content and export prompt
+2. **👀 Review Stage** - See what the agent extracted, adjust formatting
+3. **✅ Complete Stage** - Download your formatted document
+
+**Features:**
+- Real-time agent analysis visualization
+- Adjust formatting before export (font, size, bold, italic, alignment)
+- Preview extracted preferences
+- One-click download
+- Beautiful gradient UI with stage indicators
+
+### Option 2: Run Tests
 
 The best way to see the workflow in action is through the test suite:
 
@@ -135,7 +170,7 @@ pytest tests/test_workflow.py::TestWordExport::test_word_export_with_formatting 
 pytest tests/test_workflow.py --cov=src --cov-report=html --cov-report=term
 ```
 
-### Option 2: Programmatic API
+### Option 3: Programmatic API
 
 You can also use the workflow directly in Python:
 
@@ -170,38 +205,41 @@ print(f"File created: {result['file_path']}")
 
 ```
 llm-export-tools/
+├── streamlit_app.py         # 🎨 Main Streamlit web interface
 ├── requirements.txt         # Dependencies
 ├── pytest.ini               # Test configuration
-├── .env                     # Configuration (create from config/.env.example)
+├── env.example              # Environment template
+├── .env                     # Your configuration (create from env.example)
 │
 ├── config/                  # Configuration
-│   ├── settings.py          # Settings loader
-│   └── .env.example         # Template
+│   └── settings.py          # LLM provider & settings loader
 │
 ├── src/
-│   ├── agent/               # LangGraph workflow
-│   │   ├── state.py         # TypedDict state definition
-│   │   ├── data_models.py   # Pydantic models for structured output
+│   ├── agent/               # 🤖 LangGraph agentic workflow
+│   │   ├── state.py         # TypedDict state definition (ExportState)
+│   │   ├── data_models.py   # Pydantic models for structured LLM output
 │   │   ├── nodes.py         # Node functions (analyzer, formatter, tools, notification)
-│   │   ├── export_graph.py  # StateGraph definition
+│   │   ├── export_graph.py  # StateGraph definition & compilation
 │   │   └── __init__.py      # Exports run_export function
 │   │
-│   ├── tools/               # Export tools
-│   │   ├── word_tool.py     # Word export with property registry
-│   │   ├── pdf_tool.py      # PDF export with property registry
+│   ├── tools/               # 📄 Export tool implementations
+│   │   ├── word_tool.py     # Word (.docx) export with dynamic property registry
+│   │   ├── pdf_tool.py      # PDF export with dynamic property registry
 │   │   └── __init__.py
 │   │
-│   └── utils/               # Utilities
+│   └── utils/               # 🔧 Utilities
 │       ├── logger.py        # Centralized logging
-│       ├── file_manager.py  # File operations
+│       ├── file_manager.py  # File operations & path management
 │       └── __init__.py
 │
-├── tests/                   # Test suite
-│   ├── test_workflow.py     # Integration tests
+├── tests/                   # ✅ Test suite
+│   ├── test_workflow.py     # Integration tests for full agentic workflow
 │   └── __init__.py
 │
-├── visualize_graph.py       # Generate StateGraph diagram
-├── graph_visualization.mmd  # Mermaid diagram
+├── exports/                 # 📁 Generated files (auto-created)
+│
+├── visualize_graph.py       # Script to generate StateGraph visualization
+├── graph_visualization.mmd  # Mermaid diagram output
 └── GRAPH_VISUALIZATION.md   # Visualization documentation
 ```
 
@@ -419,29 +457,30 @@ MIT License - see [LICENSE](LICENSE) file for details
 ## 💡 Why This Tool?
 
 ### The Problem
-ChatGPT API has rate limits that interrupt your workflow:
+ChatGPT and other LLM platforms have limitations:
 - "You've reached your usage limit"
 - "Please wait X minutes before trying again"
-- Expensive API calls for simple exports
+- Expensive API subscriptions for basic features
+- Privacy concerns with sending data to cloud
 
 ### The Solution
-This tool runs **entirely on your machine**, bypassing all API rate limits:
-- ✅ Unlimited exports
-- ✅ Complete privacy (data stays local)
-- ✅ Faster processing (no network latency)
-- ✅ Lower cost (only pay for LLM inference, not per-export)
+This tool gives you complete control:
+- ✅ **Unlimited exports** - No rate limits, no waiting
+- ✅ **Complete privacy** - All processing happens locally with Ollama
+- ✅ **Zero cost** - Run free open-source models (phi3, mistral, llama, etc.)
+- ✅ **Faster processing** - No network latency
+- ✅ **Or use cloud LLMs** - Optional OpenAI/Anthropic for better quality
 
 ---
 
 ## 🎯 Roadmap
 
-- [ ] Add more export formats (Markdown, HTML, LaTeX)
+- [ ] Add more export formats (Excel `.xlsx`, CSV, JSON, Markdown `.md`)
 - [ ] Support for images in documents
-- [ ] Batch export multiple selections
-- [ ] Cloud sync integration (optional)
-- [ ] Custom styling templates
-- [ ] Multi-language support
-- [ ] Package as standalone app (no Python required)
+- [ ] Custom styling templates and presets
+- [ ] Batch export functionality
+- [ ] Export history and version tracking
+- [ ] Package as standalone desktop app (no Python required)
 
 ---
 
