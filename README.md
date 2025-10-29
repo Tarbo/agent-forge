@@ -136,6 +136,10 @@ python main.py
 
 The app runs in the background, listening for your hotkey trigger. Press Ctrl+C in the terminal to quit.
 
+> **Note:** Requires Python with tkinter support. If you get `ModuleNotFoundError: No module named '_tkinter'`, either:
+> - Use Python 3.12.7+ (better tcl-tk 9.x support): `pyenv install 3.12.7`
+> - Or use the Programmatic API below (no GUI needed)
+
 ### Option 2: Run Tests
 
 The best way to see the workflow in action is through the test suite:
