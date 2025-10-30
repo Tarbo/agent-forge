@@ -1,27 +1,46 @@
-# 🚀 LLM Export Tools
+# 🤖 AgentForge
 
-**An agentic AI workflow powered by LangGraph v1.0 that intelligently converts text into formatted documents.**
+**Agentic Document Creation powered by LangGraph**
 
-Export your text to Word or PDF with AI-powered formatting extraction! This tool uses a LangGraph StateGraph to analyze natural language prompts, extract formatting preferences, and route to the appropriate export tool. Features a beautiful Streamlit interface with real-time agent visualization and adjustment controls.
+Chat with AI to generate content, then export to professional documents (Word/PDF) with intelligent formatting. Built to showcase **LangGraph 1.0** for production-ready agentic workflows - demonstrating how to build intelligent, multi-step AI systems that go beyond simple chat wrappers.
 
 ---
 
-## ✨ Features
+## ✨ Why AgentForge?
 
-- 🤖 **AI-Powered Format Selection** - LangGraph StateGraph intelligently routes to the right tool
-- 🎨 **Dynamic Formatting** - LLM extracts styling preferences from natural language
-- 📄 **Export Formats** (Current):
-  - **Word** (`.docx`) - Formatted documents with python-docx
-  - **PDF** (`.pdf`) - Professional PDFs with reportlab
-- 🎨 **Beautiful Streamlit UI** - Interactive 3-stage workflow with real-time preview
-- 🔒 **Privacy-First** - All processing happens locally (supports OpenAI, Anthropic, Ollama)
-- ⚡ **Bypass API Rate Limits** - Use your own API keys or local Ollama models
-- 🧪 **Full Test Coverage** - Comprehensive pytest suite
-- 🔧 **Extensible** - Property registry pattern for easy feature additions
+**🔒 Privacy & Control**
+- Run 100% locally with Ollama - zero data leaves your infrastructure
+- Perfect for sensitive/regulated industries
+- No telemetry, no cloud dependencies
 
-**Future Enhancements:**
-- 📊 Excel (`.xlsx`), CSV, and JSON export formats
-- 📈 Markdown (`.md`) export with syntax highlighting
+**💰 Zero Cost, Unlimited Scale**
+- No API fees with local models
+- No rate limits - process unlimited documents
+- Predictable infrastructure costs
+
+**🔌 Universal LLM Compatibility**
+- Works with **any LLM provider**: OpenAI, Anthropic, Ollama, Azure, AWS, Google, or custom endpoints
+- Plug in your organization's fine-tuned models
+- Switch providers via config - no code changes
+
+**🤖 True Agentic Intelligence**
+- Intelligent export intent detection from natural language
+- Auto-cleans LLM meta-commentary from exports
+- Dynamic formatting extraction
+- Extensible agent workflows with LangGraph
+
+**📄 Export Formats**
+- **Word** (`.docx`) - Formatted documents with python-docx
+- **PDF** (`.pdf`) - Professional PDFs with reportlab
+
+---
+
+## 🎯 Perfect For
+
+- **Enterprises** with in-house LLMs or privacy requirements
+- **High-volume workflows** needing to bypass rate limits
+- **Regulated industries** (healthcare, finance, legal, government)
+- **Developers** building custom agentic document systems
 
 ---
 
@@ -29,36 +48,39 @@ Export your text to Word or PDF with AI-powered formatting extraction! This tool
 
 ```mermaid
 graph TB
-    A[🔄 START] --> B[🧠 Analyzer Node<br/>Detects format from prompt]
-    B --> C[🎨 Extract Formatting Node<br/>Extracts style preferences]
-    C --> D{🔀 Router<br/>Conditional Edge}
+    A[🔄 START] --> B[🧠 Analyzer Node<br/>Detects export intent + format]
+    B --> C[🧹 Content Cleaner Node<br/>Removes meta-commentary]
+    C --> D[🎨 Extract Formatting Node<br/>Extracts style preferences]
+    D --> E{🔀 Router<br/>Conditional Edge}
     
-    D -->|"word"| E1[📄 Word Tool Node<br/>Applies formatting]
-    D -->|"pdf"| E2[📕 PDF Tool Node<br/>Applies formatting]
+    E -->|"word"| F1[📄 Word Tool Node<br/>Applies formatting]
+    E -->|"pdf"| F2[📕 PDF Tool Node<br/>Applies formatting]
     
-    E1 --> F[📢 Notification Node<br/>Opens file]
-    E2 --> F
+    F1 --> G[📢 Notification Node<br/>Opens file]
+    F2 --> G
     
-    F --> G[✅ END]
+    G --> H[✅ END]
     
     style A fill:#90EE90
     style B fill:#87CEEB
-    style C fill:#FFD700
-    style D fill:#FFB6C1
-    style E1 fill:#DDA0DD
-    style E2 fill:#DDA0DD
-    style F fill:#98FB98
-    style G fill:#90EE90
+    style C fill:#FFB6C1
+    style D fill:#FFD700
+    style E fill:#FFB6C1
+    style F1 fill:#DDA0DD
+    style F2 fill:#DDA0DD
+    style G fill:#98FB98
+    style H fill:#90EE90
 ```
 
 ### StateGraph Components:
-- **State**: `{text: str, prompt: str, format: str, formatting: dict, file_path: str}`
+- **State**: `{text: str, prompt: str, export_intent: bool, format: str, formatting: dict, file_path: str}`
 - **Nodes**: 
-  - `analyzer_node` - Detects desired format (Word/PDF)
-  - `extract_formatting_node` - Uses LLM with structured output to extract formatting preferences
+  - `analyzer_node` - Detects export intent and desired format (Word/PDF) using structured LLM output
+  - `content_cleaner_node` - Removes LLM meta-commentary and conversational fluff
+  - `extract_formatting_node` - Uses LLM with structured output (Pydantic) to extract formatting preferences
   - `word_node` / `pdf_node` - Export tools with dynamic property registries
   - `notification_node` - Logs completion and opens file
-- **Edges**: Sequential flow from analyzer → formatting → router
+- **Edges**: Sequential flow from analyzer → cleaner → formatting → router
 - **Conditional Edges**: Router directs to Word or PDF tool based on detected format
 
 ---
@@ -133,27 +155,31 @@ EXPORT_DIRECTORY=~/Downloads/llm-exports
 
 ## 🚀 Usage
 
-### Option 1: Streamlit Web App 🎨
+### Option 1: AgentForge Chat Interface 💬
 
-Run the beautiful Streamlit web interface:
+Run the ChatGPT-style web interface:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-This opens a modern web interface at `http://localhost:8501` with:
+This opens at `http://localhost:8501` with:
 
-**Interactive 3-Stage Workflow:**
-1. **📝 Input Stage** - Enter your content and export prompt
-2. **👀 Review Stage** - See what the agent extracted, adjust formatting
-3. **✅ Complete Stage** - Download your formatted document
+**ChatGPT-Style Workflow:**
+1. **💬 Chat** with the AI to generate content (articles, proposals, reports, etc.)
+2. **📥 Export** any assistant message by:
+   - Clicking the "Export as Word/PDF" button below any message
+   - OR typing "export as Word/PDF" in the chat
+3. **🧹 AI auto-cleans** meta-commentary ("Would you like me to...", etc.)
+4. **⬇️ Download** your formatted document instantly
+5. **🔄 Continue** chatting and exporting as needed!
 
 **Features:**
-- Real-time agent analysis visualization
-- Adjust formatting before export (font, size, bold, italic, alignment)
-- Preview extracted preferences
-- One-click download
-- Beautiful gradient UI with stage indicators
+- Natural conversation with LLM
+- Inline export buttons for every AI response
+- Intelligent export intent detection
+- Automatic content cleaning
+- Beautiful modern UI with dark text on light backgrounds
 
 ### Option 2: Run Tests
 
@@ -190,14 +216,25 @@ result = run_export(text=text, prompt=prompt)
 print(f"File created: {result['file_path']}")
 ```
 
-### Example Prompts
+### Example Chat Workflow
 
-| Prompt | Result |
-|--------|--------|
-| `"Export as Word document with Arial 14pt font, bold text, and centered title"` | `.docx` with custom formatting |
-| `"Save as PDF with Times-Roman font and 1-inch margins"` | Professional PDF with layout |
-| `"Export to Word"` | `.docx` with default formatting |
-| `"Make it a PDF with italic text"` | PDF with italic styling |
+**You:** "Write a project proposal for a mobile app that helps people track their fitness goals."
+
+**AI:** *[Generates detailed proposal]* "Would you like me to add more sections or refine any part?"
+
+**You:** *Click "Export as Word"* → Download button appears
+
+**AI:** Removes "Would you like me to..." fluff → Creates clean Word doc
+
+**Download:** Clean, professional proposal without conversational meta-commentary
+
+---
+
+**Alternative: Export via chat**
+
+**You:** "Export the last response as PDF with Times New Roman font"
+
+**AI:** *Auto-detects export intent* → Cleans content → Generates PDF → Shows download button
 
 ---
 
@@ -205,7 +242,7 @@ print(f"File created: {result['file_path']}")
 
 ```
 llm-export-tools/
-├── streamlit_app.py         # 🎨 Main Streamlit web interface
+├── streamlit_app.py         # 💬 AgentForge chat interface (main entry point)
 ├── requirements.txt         # Dependencies
 ├── pytest.ini               # Test configuration
 ├── env.example              # Environment template
@@ -218,7 +255,7 @@ llm-export-tools/
 │   ├── agent/               # 🤖 LangGraph agentic workflow
 │   │   ├── state.py         # TypedDict state definition (ExportState)
 │   │   ├── data_models.py   # Pydantic models for structured LLM output
-│   │   ├── nodes.py         # Node functions (analyzer, formatter, tools, notification)
+│   │   ├── nodes.py         # Node functions (analyzer, content_cleaner, formatter, tools, notification)
 │   │   ├── export_graph.py  # StateGraph definition & compilation
 │   │   └── __init__.py      # Exports run_export function
 │   │
@@ -454,33 +491,39 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
-## 💡 Why This Tool?
+## 💡 Why AgentForge Was Built
 
-### The Problem
-ChatGPT and other LLM platforms have limitations:
-- "You've reached your usage limit"
-- "Please wait X minutes before trying again"
-- Expensive API subscriptions for basic features
-- Privacy concerns with sending data to cloud
+This project was created to explore **LangGraph 1.0's capabilities** for building real-world agentic AI applications - systems that can autonomously plan, execute, and adapt through multi-step workflows.
 
-### The Solution
-This tool gives you complete control:
-- ✅ **Unlimited exports** - No rate limits, no waiting
-- ✅ **Complete privacy** - All processing happens locally with Ollama
-- ✅ **Zero cost** - Run free open-source models (phi3, mistral, llama, etc.)
-- ✅ **Faster processing** - No network latency
-- ✅ **Or use cloud LLMs** - Optional OpenAI/Anthropic for better quality
+### The AgentForge Advantage
+
+**Traditional LLM Limitations:**
+- ❌ "You've reached your usage limit"
+- ❌ Rate limits and throttling
+- ❌ Expensive API subscriptions
+- ❌ Privacy concerns sending data to cloud
+- ❌ Vendor lock-in
+
+**AgentForge Solution:**
+- ✅ **Unlimited** - No rate limits, no waiting
+- ✅ **Private** - Run 100% locally with Ollama
+- ✅ **Zero cost** - Free open-source models (phi3, mistral, llama, etc.)
+- ✅ **Fast** - No network latency
+- ✅ **Flexible** - Works with any LLM provider (OpenAI, Anthropic, Azure, AWS, Google, custom endpoints)
+- ✅ **Enterprise-ready** - Plug in your organization's fine-tuned models
 
 ---
 
 ## 🎯 Roadmap
 
 - [ ] Add more export formats (Excel `.xlsx`, CSV, JSON, Markdown `.md`)
+- [ ] Multi-turn conversation refinement before export
 - [ ] Support for images in documents
 - [ ] Custom styling templates and presets
 - [ ] Batch export functionality
 - [ ] Export history and version tracking
 - [ ] Package as standalone desktop app (no Python required)
+- [ ] Docker container for easy deployment
 
 ---
 
@@ -490,4 +533,4 @@ Having issues? Open an issue on GitHub or contact the maintainers.
 
 ---
 
-**Built with ❤️ using LangGraph v1.0 and Python**
+**Built with ❤️ using LangGraph v1.0, LangChain, and Streamlit by [@Tarbo](https://github.com/Tarbo)**
