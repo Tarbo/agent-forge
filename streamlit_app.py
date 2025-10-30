@@ -426,6 +426,6 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #666; font-size: 0.9rem;'>
     <p>Built with <strong>LangGraph</strong> • <strong>LangChain</strong> • <strong>Streamlit</strong></p>
-    <p>Powered by Agentic AI 🤖</p>
+    <p>Powered by Agentic AI 🤖 | Created by <a href="https://github.com/Tarbo" target="_blank" style="color: #667eea; text-decoration: none;">@Tarbo</a></p>
 </div>
 """, unsafe_allow_html=True)
