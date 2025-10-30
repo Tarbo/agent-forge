@@ -113,6 +113,7 @@ def run_export(text: str, prompt: str) -> ExportState:
     initial_state: ExportState = {
         "text": text,
         "prompt": prompt,
+        "export_intent": True,  # Assumed true when calling run_export directly
         "format": "",
         "formatting": {},
         "file_path": ""
