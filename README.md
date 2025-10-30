@@ -100,8 +100,8 @@ graph TB
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Tarbo/llm-export-tools.git
-cd llm-export-tools
+git clone https://github.com/Tarbo/agent-forge.git
+cd agent-forge
 ```
 
 ### 2. Create Virtual Environment
