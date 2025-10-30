@@ -1,10 +1,12 @@
 """
-Streamlit Chat Interface for LLM Export Tools
+AgentForge - Agentic Document Creation
 
-A ChatGPT-style interface where you can:
+A ChatGPT-style interface powered by LangGraph agents where you can:
 1. Chat with an LLM to generate content
-2. Export any assistant message directly to Word/PDF
+2. Export any assistant message directly to Word/PDF with intelligent formatting
 3. Continue the conversation after exporting
+
+Built with agentic AI workflows for intelligent document transformation.
 """
 import streamlit as st
 from pathlib import Path
@@ -21,8 +23,8 @@ from src.utils.logger import logger
 
 # Page config
 st.set_page_config(
-    page_title="LLM Export Tools - Chat",
-    page_icon="💬",
+    page_title="AgentForge - Agentic Document Creation",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -56,11 +58,29 @@ st.markdown("""
     
     /* Chat messages */
     .stChatMessage {
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.98) !important;
         border-radius: 12px;
         padding: 1rem;
         margin: 0.5rem 0;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Ensure text in chat messages is dark and readable */
+    .stChatMessage p,
+    .stChatMessage div,
+    .stChatMessage span,
+    .stChatMessage [data-testid="stMarkdownContainer"] {
+        color: #1a1a1a !important;
+    }
+    
+    /* User message background - light blue tint */
+    [data-testid="stChatMessageContent"]:has([data-testid="stChatMessageUser"]) {
+        background: rgba(232, 240, 254, 0.98) !important;
+    }
+    
+    /* Assistant message background - white */
+    [data-testid="stChatMessageContent"]:has([data-testid="stChatMessageAssistant"]) {
+        background: rgba(255, 255, 255, 0.98) !important;
     }
     
     /* Export button styling */
@@ -92,6 +112,18 @@ st.markdown("""
         border-radius: 12px !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
     }
+    
+    /* Ensure text in expanders is readable */
+    .stExpander .element-container p,
+    .stExpander .element-container li,
+    .stExpander .element-container strong,
+    .stExpander .element-container {
+        color: #1a1a1a !important;
+    }
+    
+    .stExpander [data-testid="stMarkdownContainer"] {
+        color: #1a1a1a !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -110,8 +142,8 @@ if 'llm' not in st.session_state:
 
 
 # Header
-st.markdown('<div class="main-header">💬 LLM Export Chat</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Chat naturally, export instantly</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">🤖 AgentForge</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Agentic AI that transforms conversations into polished documents</div>', unsafe_allow_html=True)
 
 # Info box
 with st.expander("ℹ️ How to Use"):
