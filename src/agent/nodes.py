@@ -9,7 +9,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_ollama import ChatOllama
 
 from src.agent.state import ExportState
-from src.agent.data_models import FormattingPreferences
+from src.agent.data_models import FormattingPreferences, ExportIntentAnalysis
 from config.settings import get_llm_config
 from src.utils.logger import logger
 from src.tools.word_tool import export_to_word
@@ -100,45 +100,124 @@ def extract_formatting_node(state: ExportState) -> ExportState:
 
 def analyzer_node(state: ExportState) -> ExportState:
     """
-    Analyze user prompt to determine desired export format.
+    Analyze user message to detect export intent and desired format.
     
-    Uses LLM to detect if user wants Word or PDF export.
+    Uses LLM with structured output to detect:
+    1. Whether user wants to export (export_intent)
+    2. What format they want (word or pdf)
     
     Args:
         state: Current state with user prompt
         
     Returns:
-        Updated state with detected format
+        Updated state with export_intent and format
+    """
+    try:
+        llm = get_llm()
+        structured_llm = llm.with_structured_output(ExportIntentAnalysis)
+        
+        prompt = f"""
+        Analyze this user message to determine if they want to export content:
+        "{state['prompt']}"
+        
+        Detect export intent by looking for keywords like:
+        - "export", "save", "download", "convert", "create document"
+        - "make a Word doc", "generate PDF", "save as..."
+        
+        If they want to export, determine the format:
+        - word: for .docx, Word document, Word file, doc
+        - pdf: for .pdf, PDF document, PDF file
+        
+        If format is not specified, default to "word".
+        
+        Return:
+        - export_intent: true if they want to export, false otherwise
+        - format: "word" or "pdf"
+        - reasoning: brief explanation of your decision
+        """
+        
+        analysis = structured_llm.invoke(prompt)
+        
+        # Validate format
+        detected_format = analysis.format.strip().lower()
+        if detected_format not in ["word", "pdf"]:
+            logger.warning(f"Invalid format detected: {detected_format}. Defaulting to word.")
+            detected_format = "word"
+        
+        logger.info(f"Export intent: {analysis.export_intent}, Format: {detected_format}")
+        logger.info(f"Reasoning: {analysis.reasoning}")
+        
+        return {
+            **state, 
+            "export_intent": analysis.export_intent,
+            "format": detected_format
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to analyze export intent: {e}. Defaulting to no export.")
+        return {
+            **state, 
+            "export_intent": False,
+            "format": "word"
+        }
+
+
+def content_cleaner_node(state: ExportState) -> ExportState:
+    """
+    Clean content by removing LLM meta-commentary.
+    
+    Removes phrases like:
+    - "Would you like me to..."
+    - "Do you want..."
+    - "Should I revise..."
+    - "Let me know if..."
+    - Other follow-up questions or meta-commentary
+    
+    Args:
+        state: Current state with text content
+        
+    Returns:
+        Updated state with cleaned text
     """
     try:
         llm = get_llm()
         
         prompt = f"""
-        Analyze this user request and determine the export format they want:
-        "{state['prompt']}"
+        Clean this text by removing ALL meta-commentary, follow-up questions, and conversational fluff.
         
-        Choose ONE of these formats:
-        - word (for .docx, Word document, Word file, doc)
-        - pdf (for .pdf, PDF document, PDF file)
+        REMOVE phrases like:
+        - "Would you like me to..."
+        - "Do you want..."
+        - "Should I..."
+        - "Let me know if..."
+        - "Feel free to ask..."
+        - "Is there anything else..."
+        - Any questions asking for user feedback or next steps
+        - Any conversational filler or pleasantries
         
-        Respond with ONLY the format name (word or pdf), nothing else.
+        KEEP only:
+        - The actual content (article, proposal, document, etc.)
+        - Substantive information
+        - Core message
+        
+        Original text:
+        \"\"\"
+        {state['text']}
+        \"\"\"
+        
+        Return ONLY the cleaned content, nothing else. Do not add any commentary or explanation.
         """
         
         response = llm.invoke(prompt)
-        detected_format = response.content.strip().lower()
+        cleaned_text = response.content.strip()
         
-        # Validate format
-        if detected_format not in ["word", "pdf"]:
-            logger.warning(f"Invalid format detected: {detected_format}. Defaulting to word.")
-            detected_format = "word"
+        logger.info(f"Content cleaned. Original length: {len(state['text'])}, Cleaned length: {len(cleaned_text)}")
         
-        logger.info(f"Detected format: {detected_format}")
-        
-        return {**state, "format": detected_format}
+        return {**state, "text": cleaned_text}
         
     except Exception as e:
-        logger.error(f"Failed to detect format: {e}. Defaulting to word.")
-        return {**state, "format": "word"}
+        logger.warning(f"Failed to clean content: {e}. Using original text.")
+        return state
 
 
 def word_node(state: ExportState) -> ExportState:
